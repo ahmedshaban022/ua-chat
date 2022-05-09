@@ -7,6 +7,7 @@ import { ChatState } from "../Context/ChatProvider";
 
 export default function ChatPage() {
 const {user}=ChatState();
+const [fetchAgain,setFetchAgain]=useState(false)
 
 
 
@@ -20,8 +21,8 @@ const {user}=ChatState();
       h='91.5vh'
       p='10px'
       >
-        {user && <MyChats/>}
-        {user && <ChatBox/>}
+        {user && <MyChats fetchAgain={fetchAgain}  />}
+        {user && <ChatBox fetchAgain={fetchAgain} setFetchAgain={setFetchAgain}/>}
       </Box>
     </div>
   );

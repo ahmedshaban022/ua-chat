@@ -43,7 +43,8 @@ const GroupChatModal = ({children}) => {
         }
     }
     const handleSubmit=async ()=>{
-        if(!groupChatName || !selectedUsers){
+        
+        if( selectedUsers.length<2 || !groupChatName ){
             toast({
                 title:"Please fill all fields",
                 status:"error",
