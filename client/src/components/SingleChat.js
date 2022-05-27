@@ -1,14 +1,88 @@
-import { Box, IconButton, Text } from '@chakra-ui/react'
-import React from 'react'
+import { Box, FormControl, IconButton, Input, Spinner, Text,  useToast } from '@chakra-ui/react'
+import React, { useEffect, useState } from 'react'
 import { ChatState } from '../Context/ChatProvider'
 import {ArrowBackIcon} from '@chakra-ui/icons'
 import {getSender,getSenderFull} from '../config/ChatLogics'
 import ProfileModal from './miscellaneous/ProfileModal'
 import GroupUpdateChatModal from './miscellaneous/GroupUpdateChatModal'
-
+import axios from 'axios'
+import './style.css'
+import ScrollableChat from './ScrollableChat'
 const SingleChat = ({fetchAgain,setFetchAgain}) => {
 
-    const {user,selectedChat,setSelectedChat} = ChatState()
+    const {user,selectedChat,setSelectedChat} = ChatState();
+    const [messages,setMessages]=useState([]);
+    const [loading,setLoading]=useState(false);
+    const [newMessage,setNewMessage]=useState();
+    const toast=useToast();
+
+const fetchMessages=async()=>{
+
+    if(!selectedChat) return;
+    try {
+        const config={
+            headers:{
+                Authorization:user.token
+            }};
+            setLoading(true);
+            const {data}=await axios.get(`/api/message/${selectedChat._id}`,config);
+
+            console.log(data);
+
+            setMessages(data);    
+            setLoading(false);
+    } catch (error) {
+        toast({
+            title:"Error Occored",
+            desription:'Faild to load the search results',
+            status:"erroe",
+            duration:3000,
+            isClosable:true,
+            position:"bottom"
+        }); 
+        setLoading(false);
+    }
+}
+
+useEffect(() => {
+    fetchMessages()
+}, [selectedChat]);
+
+    const sendMessage=async (event)=>{
+        if(event.key==="Enter" && newMessage){
+            try {
+                const config={
+                    headers:{
+                        "Content-type":"application/json",
+                        Authorization:user.token
+                    }
+                }
+                setNewMessage('');
+
+                const {data}=await axios.post('/api/message',{
+                    content:newMessage,
+                    chatId:selectedChat._id,
+                },config);
+                
+                setMessages([...messages,data])
+                
+            } catch (error) {
+                toast({
+                    title:"Error Occored",
+                    desription:'Faild to load the search results',
+                    status:"erroe",
+                    duration:3000,
+                    isClosable:true,
+                    position:"bottom"
+                }); 
+            }
+        }
+    }
+
+    const typingHandler=(e)=>{
+        setNewMessage(e.target.value);
+
+    }
 
   return (
     <>
@@ -39,6 +113,7 @@ const SingleChat = ({fetchAgain,setFetchAgain}) => {
             {selectedChat.chatName.toUpperCase()}
             <GroupUpdateChatModal fetchAgain={fetchAgain}
             setFetchAgain={setFetchAgain} 
+            fetchMessages={fetchMessages}
             />
             </>
             )}
@@ -55,7 +130,33 @@ const SingleChat = ({fetchAgain,setFetchAgain}) => {
             borderRadius="lg"
             overflowY='hidden'
             >
-                {/* {msgs is here} */}
+                { loading? (
+                    <Spinner
+                    size="xl"
+                    w={20}
+                    h={20}
+                    alignSelf="center"
+                    margin="auto"
+                    />
+                ):(
+                    <div className='messages'>
+                        <ScrollableChat messages={messages}/>
+                    </div>
+                )}
+                <FormControl 
+                onKeyDown={sendMessage}
+                isRequired
+                mt={3}
+                >
+                    <Input 
+                    variant={"filled"}
+                    bg="#E0E0E0"
+                    placeholder='Enter a message..'
+                    onChange={typingHandler}
+                    value={newMessage}
+                    />
+
+                </FormControl>
             </Box>
 
         </>
