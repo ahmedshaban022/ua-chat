@@ -10,7 +10,7 @@ import './style.css';
 import ScrollableChat from './ScrollableChat'
 import io from 'socket.io-client'
 import typingImg from './typing.gif'
-const ENDPOINT = "http://localhost:5001";
+const ENDPOINT = "https://ua-live-chat.herokuapp.com";
 let socket,selectedChatCompare;
 const SingleChat = ({fetchAgain,setFetchAgain}) => {
 
