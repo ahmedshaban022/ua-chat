@@ -11,3 +11,16 @@
     border-radius: 5px;
     
 }
+
+.notification{
+    width:5px ;
+    height: 5px;
+    
+    padding: 5px;
+    color: red;
+    font-weight: bold;
+    border-radius: 50%;
+    position: absolute;
+    left: -5px;
+    
+}
