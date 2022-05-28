@@ -6,14 +6,22 @@ import {getSender,getSenderFull} from '../config/ChatLogics'
 import ProfileModal from './miscellaneous/ProfileModal'
 import GroupUpdateChatModal from './miscellaneous/GroupUpdateChatModal'
 import axios from 'axios'
-import './style.css'
+import './style.css';
 import ScrollableChat from './ScrollableChat'
+import io from 'socket.io-client'
+import typingImg from './typing.gif'
+const ENDPOINT = "http://localhost:5001";
+let socket,selectedChatCompare;
 const SingleChat = ({fetchAgain,setFetchAgain}) => {
 
     const {user,selectedChat,setSelectedChat} = ChatState();
     const [messages,setMessages]=useState([]);
     const [loading,setLoading]=useState(false);
     const [newMessage,setNewMessage]=useState();
+    const [socketConnected,setSocketConnected]=useState(false);
+    const [typing,setTyping]=useState(false);
+    const [isTyping,setIsTyping]=useState(false);
+
     const toast=useToast();
 
 const fetchMessages=async()=>{
@@ -31,6 +39,7 @@ const fetchMessages=async()=>{
 
             setMessages(data);    
             setLoading(false);
+            socket.emit('join chat',selectedChat._id);
     } catch (error) {
         toast({
             title:"Error Occored",
@@ -44,12 +53,39 @@ const fetchMessages=async()=>{
     }
 }
 
+useEffect(()=>{
+    socket= io(ENDPOINT);
+    socket.emit("setup",user);
+    socket.on('connected',()=> setSocketConnected(true));
+    socket.on('typing',()=>{setIsTyping(true); });
+    socket.on('stop typing',()=>{setIsTyping(false); });
+},[]) ;
+
+
 useEffect(() => {
-    fetchMessages()
+    fetchMessages();
+
+    selectedChatCompare = selectedChat;
 }, [selectedChat]);
+
+useEffect(() => {
+    
+  socket.on('message recived',(newMessageRecieved)=>{
+      
+    if(!selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id ){
+        // give notification
+        
+    }else{
+        setMessages([...messages,newMessageRecieved])
+    }
+  })
+});
+
+
 
     const sendMessage=async (event)=>{
         if(event.key==="Enter" && newMessage){
+            socket.emit('stop typing',selectedChat._id)
             try {
                 const config={
                     headers:{
@@ -64,8 +100,8 @@ useEffect(() => {
                     chatId:selectedChat._id,
                 },config);
                 
+                socket.emit('new message',data)
                 setMessages([...messages,data])
-                
             } catch (error) {
                 toast({
                     title:"Error Occored",
@@ -81,7 +117,22 @@ useEffect(() => {
 
     const typingHandler=(e)=>{
         setNewMessage(e.target.value);
+        if(!socketConnected)return;
 
+        if(!typing){
+            setTyping(true);
+            socket.emit('typing',selectedChat._id);
+        }
+        let lastTypingTime= new Date().getTime();
+        let timerLength= 3000;
+        setTimeout(()=>{
+            let timeNow=new Date().getTime();
+            let timeDiff = timeNow - lastTypingTime;
+            if(timeDiff>= timerLength && typing){
+                socket.emit('stop typing',selectedChat._id);
+                setTyping(false)
+            }
+        },timerLength)
     }
 
   return (
@@ -98,6 +149,7 @@ useEffect(() => {
          justifyContent={{base:"space-between"}}
          alignItems="center"
         >
+            
             <IconButton 
             d={{base:"flex",md:"none"}}
             icon={<ArrowBackIcon/>}
@@ -148,6 +200,7 @@ useEffect(() => {
                 isRequired
                 mt={3}
                 >
+                    {isTyping?<div className='typing-animation'><img src={typingImg} alt=""/></div>:(<></>)}
                     <Input 
                     variant={"filled"}
                     bg="#E0E0E0"
