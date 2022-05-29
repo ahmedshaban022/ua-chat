@@ -97,7 +97,8 @@ const Register = () => {
               });
               localStorage.setItem('userInfo',JSON.stringify(data));
               setLoading(false);
-               history.push('/chats');
+            //    history.push('/chats');
+            window.location.replace('/chats')
         } catch (error) {
         
             toast({
