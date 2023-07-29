@@ -22,11 +22,11 @@ if (process.env.NODE_ENV === "production") {
     let pathString = __dirname1;
 
     if (process.env.host === "render") {
-      let st = __dirname1;
+      let st = path.join(__dirname1, "client", "build", "index.html");
       const ts = st.split("/");
       ts.splice(ts.indexOf("backend"), 1);
       pathString = ts.join("/");
-      console.log("render", pathString);
+      console.log("render", { ts, pathString, __dirname1 });
     }
     console.log(path.join(pathString, "client", "build", "index.html"));
 
