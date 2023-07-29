@@ -27,9 +27,10 @@ if (process.env.NODE_ENV === "production") {
       ts.splice(ts.indexOf("backend"), 1);
       pathString = ts.join("/");
       console.log("render", { ts, pathString, __dirname1 });
-      res.sendFile(path.join(pathString));
+      console.log(path.join(pathString), "pathJoin");
+      res.sendFile(pathString);
     }
-
+    console.log(path.join(__dirname1, "client", "build", "index.html"));
     res.sendFile(path.join(__dirname1, "client", "build", "index.html"));
   });
 } else {
