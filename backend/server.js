@@ -19,9 +19,16 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static("client/build"));
   app.get("*", (req, res) => {
     console.log(__dirname1);
-    console.log(path.join(__dirname1, "client", "build", "index.html"));
+    let pathString = __dirname1;
 
-    res.sendFile(path.join(__dirname1, "client", "build", "index.html"));
+    if (process.env.host === "render") {
+      let st = __dirname1;
+      const ts = st.split("/");
+      pathString = ts.splice(ts.indexOf("backend"), 1);
+    }
+    console.log(path.join(pathString, "client", "build", "index.html"));
+
+    res.sendFile(path.join(pathString, "client", "build", "index.html"));
   });
 } else {
   app.get("/", (req, res) => {
