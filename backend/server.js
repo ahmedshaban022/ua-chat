@@ -30,10 +30,11 @@ if (process.env.NODE_ENV === "production") {
       // console.log(path.join(pathString), "pathJoin");
       console.log("render");
       res.sendFile(pathString);
+    } else {
+      console.log("No-render");
+      console.log(path.join(__dirname1, "client", "build", "index.html"));
+      res.sendFile(path.join(__dirname1, "client", "build", "index.html"));
     }
-    console.log("No-render");
-    console.log(path.join(__dirname1, "client", "build", "index.html"));
-    res.sendFile(path.join(__dirname1, "client", "build", "index.html"));
   });
 } else {
   app.get("/", (req, res) => {
