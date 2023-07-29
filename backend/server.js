@@ -28,8 +28,10 @@ if (process.env.NODE_ENV === "production") {
       pathString = ts.join("/");
       console.log("render", { ts, pathString, __dirname1 });
       // console.log(path.join(pathString), "pathJoin");
+      console.log("render");
       res.sendFile(pathString);
     }
+    console.log("No-render");
     console.log(path.join(__dirname1, "client", "build", "index.html"));
     res.sendFile(path.join(__dirname1, "client", "build", "index.html"));
   });
